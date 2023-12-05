@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-api-deployment
+  namespace: secureapi
+  labels:
+    app: auth-api-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: auth-api-app
+  template:
+    metadata:
+      labels:
+        app: auth-api-app
+    spec:
+      containers:
+      - name: auth-api-app
+        image: ghcr.io/lopoon/auth-api:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 3000
+      imagePullSecrets:
+        - name: ghcr-login-secret
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth-api-app-service
+  namespace: secureapi
+spec:
+  selector:
+    app: auth-api-app
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 3000
+  externalTrafficPolicy: Cluster
+  sessionAffinity: None
+  type: NodePort
+
